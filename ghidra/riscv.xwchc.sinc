@@ -1,0 +1,23 @@
+# WCH QingKe "XW" (Xwchc) compressed byte/halfword memory ops.
+# Added locally for MCHOSE Jet75-II firmware analysis (CH32V30x). Encodings inferred from code context.
+qkbimm: uimm is cop1212 & cop1011 & cop0506 [ uimm = cop1212 | (cop0506 << 1) | (cop1011 << 3); ] { local tmp:$(XLEN) = uimm; export tmp; }
+qkhimm: uimm is cop1012 & cop0506 [ uimm = (cop0506 << 1) | (cop1012 << 3); ] { local tmp:$(XLEN) = uimm; export tmp; }
+qkspb:  uimm is cop0710 [ uimm = cop0710 << 0; ] { local tmp:$(XLEN) = uimm; export tmp; }
+qksph:  uimm is cop0710 [ uimm = cop0710 << 1; ] { local tmp:$(XLEN) = uimm; export tmp; }
+
+:qk.c.lbu cr0204s,qkbimm(cr0709s) is cr0709s & cr0204s & cop0001=0x0 & cop1315=0x1 & qkbimm
+{ local ea:$(XLEN) = qkbimm + cr0709s; cr0204s = zext(*[ram]:1 ea); }
+:qk.c.sb cr0204s,qkbimm(cr0709s) is cr0709s & cr0204s & cop0001=0x0 & cop1315=0x5 & qkbimm
+{ local ea:$(XLEN) = qkbimm + cr0709s; *[ram]:1 ea = cr0204s:1; }
+:qk.c.lhu cr0204s,qkhimm(cr0709s) is cr0709s & cr0204s & cop0001=0x2 & cop1315=0x1 & qkhimm
+{ local ea:$(XLEN) = qkhimm + cr0709s; cr0204s = zext(*[ram]:2 ea); }
+:qk.c.sh cr0204s,qkhimm(cr0709s) is cr0709s & cr0204s & cop0001=0x2 & cop1315=0x5 & qkhimm
+{ local ea:$(XLEN) = qkhimm + cr0709s; *[ram]:2 ea = cr0204s:2; }
+:qk.c.lbusp cr0204s,qkspb(sp) is cr0204s & sp & cop0001=0x0 & cop1315=0x4 & cop1112=0 & cop0606=0 & cop0505=0 & qkspb
+{ local ea:$(XLEN) = qkspb + sp; cr0204s = zext(*[ram]:1 ea); }
+:qk.c.sbsp cr0204s,qkspb(sp) is cr0204s & sp & cop0001=0x0 & cop1315=0x4 & cop1112=0 & cop0606=1 & cop0505=0 & qkspb
+{ local ea:$(XLEN) = qkspb + sp; *[ram]:1 ea = cr0204s:1; }
+:qk.c.lhusp cr0204s,qksph(sp) is cr0204s & sp & cop0001=0x0 & cop1315=0x4 & cop1112=0 & cop0606=0 & cop0505=1 & qksph
+{ local ea:$(XLEN) = qksph + sp; cr0204s = zext(*[ram]:2 ea); }
+:qk.c.shsp cr0204s,qksph(sp) is cr0204s & sp & cop0001=0x0 & cop1315=0x4 & cop1112=0 & cop0606=1 & cop0505=1 & qksph
+{ local ea:$(XLEN) = qksph + sp; *[ram]:2 ea = cr0204s:2; }

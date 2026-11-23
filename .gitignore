@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+# vendor material and anything derived from it stays local
+*.bin
+*.exe
+*.elf
+*.c
+*.json
+webdriver-copy/
+log*.txt
